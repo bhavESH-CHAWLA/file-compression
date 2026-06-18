@@ -48,11 +48,11 @@ app.post("/compress", upload.single("file"), (req, res) => {
     );
 
     const exePath = path.join(
-        __dirname,
-        "..",
-        "cpp",
-        "huffman.exe"
-    );
+    __dirname,
+    "..",
+    "cpp",
+    "huffman"
+);
 
     exec(
         `"${exePath}" "${inputPath}" "${outputPath}"`,
