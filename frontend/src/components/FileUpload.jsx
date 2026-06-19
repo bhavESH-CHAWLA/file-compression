@@ -21,10 +21,10 @@ function FileUpload({ setCompressionData }) {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await axios.post(
-        "https://file-compression-1-0brl.onrender.com/",
-        formData
-      );
+      await axios.post(
+      "https://file-compression-1-0br1.onrender.com/compress",
+      formData
+    );
 
       setCompressionData(response.data);
       setDownloadFile(response.data.filename);
