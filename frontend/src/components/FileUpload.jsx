@@ -22,7 +22,7 @@ function FileUpload({ setCompressionData }) {
       formData.append("file", file);
 
       const response = await axios.post(
-        "http://localhost:5000/compress",
+        "https://file-compression-1-0brl.onrender.com/",
         formData
       );
 
