@@ -7,15 +7,12 @@ const { exec } = require("child_process");
 
 const app = express();
 
-const cors = require("cors");
-
 app.use(
   cors({
-    origin: [
-      "https://file-compression-6u53.vercel.app"
-    ]
+    origin: "https://file-compression-6u53.vercel.app"
   })
 );
+
 app.use(express.json());
 
 const storage = multer.diskStorage({
