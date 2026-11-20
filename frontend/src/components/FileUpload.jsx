@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import axios from "axios";
 import { FaUpload, FaFileAlt, FaDownload } from "react-icons/fa";
+import API_URL from "../api";
 
 function FileUpload({ setCompressionData }) {
   const [file, setFile] = useState(null);
@@ -21,10 +22,7 @@ function FileUpload({ setCompressionData }) {
       const formData = new FormData();
       formData.append("file", file);
 
-      await axios.post(
-      "https://file-compression-1-0br1.onrender.com/compress",
-      formData
-    );
+      const response = await axios.post(`${API_URL}/compress`, formData);
 
       setCompressionData(response.data);
       setDownloadFile(response.data.filename);
@@ -33,9 +31,9 @@ function FileUpload({ setCompressionData }) {
     } catch (err) {
       console.error(err);
       alert("Compression Failed");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -89,7 +87,7 @@ function FileUpload({ setCompressionData }) {
 
           {downloadFile && (
             <a
-              href={`http://localhost:5000/download/${downloadFile}`}
+              href={`${API_URL}/download/${encodeURIComponent(downloadFile)}`}
               className="bg-purple-600 hover:bg-purple-700 px-8 py-3 rounded-xl text-white flex items-center gap-3"
             >
               <FaDownload />

@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import axios from "axios";
 import { FaUpload } from "react-icons/fa";
+import API_URL from "../api";
 
 function Decompress() {
 
@@ -22,7 +23,7 @@ function Decompress() {
     try {
 
       const response = await axios.post(
-        "http://localhost:5000/decompress",
+        `${API_URL}/decompress`,
         formData,
         {
           responseType: "blob"

@@ -1,7 +1,6 @@
+import API_URL from "../api";
+
 function DownloadList({ files }) {
-
-    const API = "http://localhost:5000";
-
     return (
 
         <div>
@@ -26,7 +25,7 @@ function DownloadList({ files }) {
                             <br />
 
                             <a
-                                href={`${API}/download/${file}`}
+                                href={`${API_URL}/download/${encodeURIComponent(file)}`}
                             >
                                 Download
                             </a>

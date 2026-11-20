@@ -3,22 +3,37 @@ const multer = require("multer");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
-const { exec } = require("child_process");
+const { execFile } = require("child_process");
 
 const app = express();
+const uploadDirectory = path.join(__dirname, "uploads");
+const compressedDirectory = path.join(__dirname, "compressed");
+const allowedOrigins = (
+  process.env.FRONTEND_URL ||
+  "http://localhost:5173,https://file-compression-6u53.vercel.app"
+)
+  .split(",")
+  .map((origin) => origin.trim());
 
-app.use(
-  cors({
-    origin: "https://file-compression-6u53.vercel.app"
-  })
-);
+fs.mkdirSync(uploadDirectory, { recursive: true });
+fs.mkdirSync(compressedDirectory, { recursive: true });
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Origin is not allowed by CORS"));
+  }
+}));
 
 app.use(express.json());
 
 const storage = multer.diskStorage({
-    destination: "./uploads",
+    destination: uploadDirectory,
     filename: (req, file, cb) => {
-        cb(null, file.originalname);
+        cb(null, path.basename(file.originalname.replace(/[\\/]/g, "_")));
     }
 });
 
@@ -37,37 +52,33 @@ app.post("/compress", upload.single("file"), (req, res) => {
         });
     }
 
-    const inputPath = path.join(
-        __dirname,
-        "uploads",
-        req.file.originalname
-    );
+    const inputPath = req.file.path;
 
     const outputFileName =
-        req.file.originalname + ".huff";
+        req.file.filename + ".huff";
 
     const outputPath = path.join(
-        __dirname,
-        "compressed",
+        compressedDirectory,
         outputFileName
     );
 
     const exePath = path.join(
-    __dirname,
-    "..",
-    "cpp",
-    "huffman"
-);
+        __dirname,
+        "..",
+        "cpp",
+        process.platform === "win32" ? "huffman.exe" : "huffman"
+    );
 
-    exec(
-        `"${exePath}" "${inputPath}" "${outputPath}"`,
+    execFile(
+        exePath,
+        [inputPath, outputPath],
         (error, stdout, stderr) => {
 
             if (error) {
 
                 return res.status(500).json({
                     success: false,
-                    error: stderr
+                    error: stderr || error.message
                 });
 
             }
@@ -124,8 +135,7 @@ app.post("/compress", upload.single("file"), (req, res) => {
 app.get("/download/:filename", (req, res) => {
 
     const filePath = path.join(
-        __dirname,
-        "compressed",
+        compressedDirectory,
         req.params.filename
     );
 
@@ -145,8 +155,7 @@ app.get("/download/:filename", (req, res) => {
 app.get("/files", (req, res) => {
 
     const folderPath = path.join(
-        __dirname,
-        "compressed"
+        compressedDirectory
     );
 
     fs.readdir(folderPath, (err, files) => {
@@ -165,10 +174,12 @@ app.get("/files", (req, res) => {
 
 });
 
-app.listen(5000, () => {
+const port = process.env.PORT || 5000;
+
+app.listen(port, () => {
 
     console.log(
-        "Server running on port 5000"
+        `Server running on port ${port}`
     );
 
 });
